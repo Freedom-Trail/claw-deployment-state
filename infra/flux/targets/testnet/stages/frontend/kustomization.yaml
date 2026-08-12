@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: claw-testnet
+commonAnnotations:
+  claw.io/release-id: claw-31643525746-1
+  delivery.claw.io/intent-digest: sha256:4be0f547986033937fd36deef3225285d642a3a88df09b8c8b20597d32ea7cf9
+  delivery.claw.io/release-sha: "99d41a3e3f77721fd8c1b5c65b94af56d3bf5825"
+resources:
+  - ../../../../../k8s/base
+patches:
+  - target:
+      kind: Namespace|ServiceAccount|EndpointSlice|NetworkPolicy
+    patch: |-
+      $patch: delete
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: delete-selected-resources
+  - target:
+      kind: Service
+      name: claw-(postgres|indexer-postgres|api)
+    patch: |-
+      $patch: delete
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: delete-selected-resources
+  - target:
+      kind: Deployment
+      name: claw-(api|worker|indexer)
+    patch: |-
+      $patch: delete
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: delete-selected-resources
+images:
+  - name: registry.invalid/claw/web
+    newName: 127.0.0.1:5000/claw/web
+    digest: sha256:c120cf728470f148aa17a086a2e51dcc12f1f29e18c3348c3771f24d5ab808c2
+  - name: registry.invalid/claw/admin
+    newName: 127.0.0.1:5000/claw/admin
+    digest: sha256:680a954e465d39ac8976ca408a20194f66b3c37399d3024b61e39c8fcb32a3a3

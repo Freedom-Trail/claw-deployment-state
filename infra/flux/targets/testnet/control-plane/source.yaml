@@ -1,0 +1,27 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: claw-testnet
+  namespace: claw-flux-testnet
+spec:
+  interval: 1m
+  timeout: 60s
+  suspend: false
+  url: https://github.com/Freedom-Trail/claw-deployment-state.git
+  ref:
+    branch: main
+  verify:
+    mode: HEAD
+    secretRef:
+      name: claw-flux-git-verification-public-keys
+  ignore: |
+    /*
+    !/infra/
+    /infra/*
+    !/infra/flux/
+    !/infra/flux/targets/
+    !/infra/flux/targets/testnet/
+    !/infra/flux/targets/testnet/**
+    !/infra/k8s/
+    !/infra/k8s/base/
+    !/infra/k8s/base/**

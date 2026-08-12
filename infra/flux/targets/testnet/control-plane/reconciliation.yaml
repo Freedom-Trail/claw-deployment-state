@@ -1,0 +1,224 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: claw-gate
+  namespace: claw-flux-testnet
+  labels:
+    delivery.claw.io/environment: testnet
+    delivery.claw.io/stage: gate
+    delivery.claw.io/intent-id: claw-31643525746-1
+    delivery.claw.io/release-sha: "99d41a3e3f77721fd8c1b5c65b94af56d3bf5825"
+spec:
+  interval: 2m
+  retryInterval: 1m
+  timeout: 15m
+  suspend: true
+  path: ./infra/flux/targets/testnet/stages/gate
+  sourceRef:
+    kind: GitRepository
+    name: claw-testnet
+  targetNamespace: claw-testnet
+  serviceAccountName: claw-flux-reconciler
+  prune: false
+  deletionPolicy: Orphan
+  wait: true
+  healthChecks:
+    - apiVersion: delivery.claw.io/v1alpha1
+      kind: ClawRelease
+      name: claw-31643525746-1
+      namespace: claw-testnet
+  healthCheckExprs:
+    - apiVersion: delivery.claw.io/v1alpha1
+      kind: ClawRelease
+      inProgress: >-
+        has(status.phase) && status.phase in ['PENDING', 'VERIFYING']
+      failed: >-
+        has(status.phase) && status.phase in ['BLOCKED', 'FAILED']
+      current: >-
+        has(status.observedGeneration) &&
+        status.observedGeneration == metadata.generation &&
+        status.observedIntentDigest == spec.intentDigest &&
+        status.conditions.exists(c,
+          c.type == 'GateReady' && c.status == 'True' &&
+          c.observedGeneration == metadata.generation)
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: claw-migration
+  namespace: claw-flux-testnet
+  labels:
+    delivery.claw.io/environment: testnet
+    delivery.claw.io/stage: migration
+    delivery.claw.io/intent-id: claw-31643525746-1
+    delivery.claw.io/release-sha: "99d41a3e3f77721fd8c1b5c65b94af56d3bf5825"
+spec:
+  dependsOn:
+    - name: claw-gate
+      readyExpr: >-
+        dep.metadata.labels['delivery.claw.io/intent-id'] == self.metadata.labels['delivery.claw.io/intent-id'] &&
+        dep.metadata.labels['delivery.claw.io/release-sha'] == self.metadata.labels['delivery.claw.io/release-sha'] &&
+        dep.status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True') &&
+        dep.metadata.generation == dep.status.observedGeneration
+  interval: 2m
+  retryInterval: 1m
+  timeout: 15m
+  suspend: true
+  path: ./infra/flux/targets/testnet/stages/migration
+  sourceRef:
+    kind: GitRepository
+    name: claw-testnet
+  targetNamespace: claw-testnet
+  serviceAccountName: claw-flux-reconciler
+  prune: false
+  deletionPolicy: Orphan
+  wait: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: claw-backend
+  namespace: claw-flux-testnet
+  labels:
+    delivery.claw.io/environment: testnet
+    delivery.claw.io/stage: backend
+    delivery.claw.io/intent-id: claw-31643525746-1
+    delivery.claw.io/release-sha: "99d41a3e3f77721fd8c1b5c65b94af56d3bf5825"
+spec:
+  dependsOn:
+    - name: claw-migration
+      readyExpr: >-
+        dep.metadata.labels['delivery.claw.io/intent-id'] == self.metadata.labels['delivery.claw.io/intent-id'] &&
+        dep.metadata.labels['delivery.claw.io/release-sha'] == self.metadata.labels['delivery.claw.io/release-sha'] &&
+        dep.status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True') &&
+        dep.metadata.generation == dep.status.observedGeneration
+  interval: 2m
+  retryInterval: 1m
+  timeout: 15m
+  suspend: true
+  path: ./infra/flux/targets/testnet/stages/backend
+  sourceRef:
+    kind: GitRepository
+    name: claw-testnet
+  targetNamespace: claw-testnet
+  serviceAccountName: claw-flux-reconciler
+  prune: true
+  deletionPolicy: Orphan
+  wait: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: claw-indexer
+  namespace: claw-flux-testnet
+  labels:
+    delivery.claw.io/environment: testnet
+    delivery.claw.io/stage: indexer
+    delivery.claw.io/intent-id: claw-31643525746-1
+    delivery.claw.io/release-sha: "99d41a3e3f77721fd8c1b5c65b94af56d3bf5825"
+spec:
+  dependsOn:
+    - name: claw-backend
+      readyExpr: >-
+        dep.metadata.labels['delivery.claw.io/intent-id'] == self.metadata.labels['delivery.claw.io/intent-id'] &&
+        dep.metadata.labels['delivery.claw.io/release-sha'] == self.metadata.labels['delivery.claw.io/release-sha'] &&
+        dep.status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True') &&
+        dep.metadata.generation == dep.status.observedGeneration
+  interval: 2m
+  retryInterval: 1m
+  timeout: 15m
+  suspend: true
+  path: ./infra/flux/targets/testnet/stages/indexer
+  sourceRef:
+    kind: GitRepository
+    name: claw-testnet
+  targetNamespace: claw-testnet
+  serviceAccountName: claw-flux-reconciler
+  prune: true
+  deletionPolicy: Orphan
+  wait: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: claw-frontend
+  namespace: claw-flux-testnet
+  labels:
+    delivery.claw.io/environment: testnet
+    delivery.claw.io/stage: frontend
+    delivery.claw.io/intent-id: claw-31643525746-1
+    delivery.claw.io/release-sha: "99d41a3e3f77721fd8c1b5c65b94af56d3bf5825"
+spec:
+  dependsOn:
+    - name: claw-indexer
+      readyExpr: >-
+        dep.metadata.labels['delivery.claw.io/intent-id'] == self.metadata.labels['delivery.claw.io/intent-id'] &&
+        dep.metadata.labels['delivery.claw.io/release-sha'] == self.metadata.labels['delivery.claw.io/release-sha'] &&
+        dep.status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True') &&
+        dep.metadata.generation == dep.status.observedGeneration
+  interval: 2m
+  retryInterval: 1m
+  timeout: 15m
+  suspend: true
+  path: ./infra/flux/targets/testnet/stages/frontend
+  sourceRef:
+    kind: GitRepository
+    name: claw-testnet
+  targetNamespace: claw-testnet
+  serviceAccountName: claw-flux-reconciler
+  prune: true
+  deletionPolicy: Orphan
+  wait: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: claw-acceptance
+  namespace: claw-flux-testnet
+  labels:
+    delivery.claw.io/environment: testnet
+    delivery.claw.io/stage: acceptance
+    delivery.claw.io/intent-id: claw-31643525746-1
+    delivery.claw.io/release-sha: "99d41a3e3f77721fd8c1b5c65b94af56d3bf5825"
+spec:
+  dependsOn:
+    - name: claw-frontend
+      readyExpr: >-
+        dep.metadata.labels['delivery.claw.io/intent-id'] == self.metadata.labels['delivery.claw.io/intent-id'] &&
+        dep.metadata.labels['delivery.claw.io/release-sha'] == self.metadata.labels['delivery.claw.io/release-sha'] &&
+        dep.status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True') &&
+        dep.metadata.generation == dep.status.observedGeneration
+  interval: 2m
+  retryInterval: 1m
+  timeout: 20m
+  suspend: true
+  path: ./infra/flux/targets/testnet/stages/acceptance
+  sourceRef:
+    kind: GitRepository
+    name: claw-testnet
+  targetNamespace: claw-testnet
+  serviceAccountName: claw-flux-reconciler
+  prune: false
+  deletionPolicy: Orphan
+  wait: true
+  healthChecks:
+    - apiVersion: delivery.claw.io/v1alpha1
+      kind: ClawRelease
+      name: claw-31643525746-1
+      namespace: claw-testnet
+  healthCheckExprs:
+    - apiVersion: delivery.claw.io/v1alpha1
+      kind: ClawRelease
+      inProgress: >-
+        has(status.phase) && status.phase in ['GATE_READY', 'MIGRATION_AUTHORIZED', 'RECONCILING', 'ACCEPTANCE_PENDING']
+      failed: >-
+        has(status.phase) && status.phase in ['BLOCKED', 'FAILED']
+      current: >-
+        has(status.observedGeneration) &&
+        status.observedGeneration == metadata.generation &&
+        status.observedIntentDigest == spec.intentDigest &&
+        status.phase == 'COMPLETED' &&
+        status.conditions.exists(c,
+          c.type == 'AcceptanceReady' && c.status == 'True' &&
+          c.observedGeneration == metadata.generation) &&
+        has(status.evidenceDigest)

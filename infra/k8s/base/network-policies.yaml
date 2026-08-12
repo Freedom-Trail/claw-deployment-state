@@ -1,0 +1,148 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: claw-prod
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: claw-prod
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - ipBlock: { cidr: 10.53.0.10/32 }
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traefik-ingress
+  namespace: claw-prod
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values: [claw-api, claw-web, claw-admin]
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: traefik
+      ports:
+        - { protocol: TCP, port: 3000 }
+        - { protocol: TCP, port: 8080 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-internal-ingress
+  namespace: claw-prod
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: claw-api }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values: [claw-worker, claw-indexer]
+      ports: [{ protocol: TCP, port: 3000 }]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-egress
+  namespace: claw-prod
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: claw-api }
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - ipBlock: { cidr: 172.19.0.2/32 }
+      ports: [{ protocol: TCP, port: 5432 }]
+    - to:
+        - ipBlock: { cidr: 0.0.0.0/0 }
+      ports: [{ protocol: TCP, port: 443 }]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: worker-egress
+  namespace: claw-prod
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: claw-worker }
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: claw-api }
+      ports: [{ protocol: TCP, port: 3000 }]
+    - to:
+        - ipBlock: { cidr: 172.19.0.2/32 }
+      ports: [{ protocol: TCP, port: 5432 }]
+    - to:
+        - ipBlock: { cidr: 0.0.0.0/0 }
+      ports: [{ protocol: TCP, port: 443 }]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: migrator-egress
+  namespace: claw-prod
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: claw-migrator }
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - ipBlock: { cidr: 172.19.0.2/32 }
+      ports: [{ protocol: TCP, port: 5432 }]
+    - to:
+        - ipBlock: { cidr: 0.0.0.0/0 }
+      ports: [{ protocol: TCP, port: 443 }]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: indexer-egress
+  namespace: claw-prod
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: claw-indexer }
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: claw-api }
+      ports: [{ protocol: TCP, port: 3000 }]
+    - to:
+        - ipBlock: { cidr: 172.19.0.3/32 }
+      ports: [{ protocol: TCP, port: 5432 }]
+    - to:
+        - ipBlock: { cidr: 0.0.0.0/0 }
+      ports: [{ protocol: TCP, port: 443 }]

@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: claw-api
+  namespace: claw-prod
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: claw-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: claw-api
+        app.kubernetes.io/part-of: claw
+    spec:
+      serviceAccountName: claw-api
+      terminationGracePeriodSeconds: 45
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          image: registry.invalid/claw/backend:replace
+          imagePullPolicy: IfNotPresent
+          command: ["pnpm", "--filter", "@claw/api", "start"]
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: CLAW_ENV
+              value: testnet
+            - name: CLAW_CONFIG_FILE
+              value: /etc/claw/config/api.json
+            - name: CLAW_SECRETS_DIR
+              value: /run/secrets/claw
+          ports:
+            - name: http
+              containerPort: 3000
+          startupProbe:
+            httpGet: { path: /health, port: http }
+            failureThreshold: 30
+            periodSeconds: 2
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket: { port: http }
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests: { cpu: 150m, memory: 384Mi }
+            limits: { cpu: "1", memory: 768Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - { name: config, mountPath: /etc/claw/config, readOnly: true }
+            - { name: secrets, mountPath: /run/secrets/claw, readOnly: true }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: config
+          configMap:
+            name: claw-service-configs
+            items: [{ key: api.json, path: api.json }]
+        - name: secrets
+          secret:
+            secretName: claw-runtime-secrets
+            defaultMode: 0440
+            items:
+              - { key: bsc-rpc-url, path: claw/testnet/shared/bsc-rpc-url }
+              - { key: database-api-url, path: claw/testnet/database/api-url }
+              - { key: database-ca, path: claw/testnet/database/ca.crt }
+              - { key: auth-session-secret, path: claw/testnet/auth/session-secret }
+              - { key: auth-admin-token, path: claw/testnet/auth/admin-token }
+              - { key: internal-api-key, path: claw/testnet/shared/internal-api-key }
+        - name: tmp
+          emptyDir: { medium: Memory, sizeLimit: 64Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: claw-api
+  namespace: claw-prod
+spec:
+  selector: { app.kubernetes.io/name: claw-api }
+  ports:
+    - { name: http, port: 3000, targetPort: http }

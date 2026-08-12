@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: claw-worker
+  namespace: claw-prod
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxUnavailable: 0, maxSurge: 1 }
+  selector:
+    matchLabels: { app.kubernetes.io/name: claw-worker }
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: claw-worker
+        app.kubernetes.io/part-of: claw
+    spec:
+      serviceAccountName: claw-worker
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: worker
+          image: registry.invalid/claw/backend:replace
+          imagePullPolicy: IfNotPresent
+          command: ["pnpm", "--filter", "@claw/worker", "start"]
+          env:
+            - { name: NODE_ENV, value: production }
+            - { name: CLAW_ENV, value: testnet }
+            - { name: CLAW_CONFIG_FILE, value: /etc/claw/config/worker.json }
+            - { name: CLAW_SECRETS_DIR, value: /run/secrets/claw }
+          startupProbe:
+            exec:
+              command: ["node", "-e", "fetch('http://127.0.0.1:3001/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+            failureThreshold: 30
+            periodSeconds: 2
+          readinessProbe:
+            exec:
+              command: ["node", "-e", "fetch('http://127.0.0.1:3001/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["node", "-e", "fetch('http://127.0.0.1:3001/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { cpu: 750m, memory: 512Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - { name: config, mountPath: /etc/claw/config, readOnly: true }
+            - { name: secrets, mountPath: /run/secrets/claw, readOnly: true }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: config
+          configMap:
+            name: claw-service-configs
+            items: [{ key: worker.json, path: worker.json }]
+        - name: secrets
+          secret:
+            secretName: claw-runtime-secrets
+            defaultMode: 0440
+            items:
+              - { key: bsc-rpc-url, path: claw/testnet/shared/bsc-rpc-url }
+              - { key: database-worker-url, path: claw/testnet/database/worker-url }
+              - { key: database-ca, path: claw/testnet/database/ca.crt }
+              - { key: internal-api-key, path: claw/testnet/shared/internal-api-key }
+        - name: tmp
+          emptyDir: { medium: Memory, sizeLimit: 64Mi }

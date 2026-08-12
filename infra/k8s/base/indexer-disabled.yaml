@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: claw-indexer
+  namespace: claw-prod
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: { app.kubernetes.io/name: claw-indexer }
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: claw-indexer
+        app.kubernetes.io/part-of: claw
+    spec:
+      serviceAccountName: claw-indexer
+      terminationGracePeriodSeconds: 90
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: indexer
+          image: registry.invalid/claw/backend:replace
+          imagePullPolicy: IfNotPresent
+          command: ["pnpm", "--filter", "@claw/indexer", "start"]
+          env:
+            - { name: NODE_ENV, value: production }
+            - { name: CLAW_ENV, value: testnet }
+            - { name: CLAW_CONFIG_FILE, value: /etc/claw/config/indexer.json }
+            - { name: CLAW_SECRETS_DIR, value: /run/secrets/claw }
+            - { name: NODE_EXTRA_CA_CERTS, value: /run/secrets/claw/claw/testnet/database/ca.crt }
+          ports:
+            - { name: control, containerPort: 9900 }
+          readinessProbe:
+            httpGet: { path: /readyz, port: control }
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /health, port: control }
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits: { cpu: "1", memory: 1Gi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - { name: config, mountPath: /etc/claw/config, readOnly: true }
+            - { name: secrets, mountPath: /run/secrets/claw, readOnly: true }
+            - { name: envio-generated, mountPath: /app/services/indexer/.envio }
+            - { name: state, mountPath: /var/lib/claw-indexer }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: config
+          configMap:
+            name: claw-service-configs
+            items: [{ key: indexer.json, path: indexer.json }]
+        - name: secrets
+          secret:
+            secretName: claw-runtime-secrets
+            defaultMode: 0440
+            items:
+              - { key: bsc-rpc-url, path: claw/testnet/shared/bsc-rpc-url }
+              - { key: internal-api-key, path: claw/testnet/shared/internal-api-key }
+              - { key: database-indexer-password, path: claw/testnet/database/indexer-password }
+              - { key: database-ca, path: claw/testnet/database/ca.crt }
+              - { key: indexer-release-control-token, path: claw/testnet/indexer/release-control-token }
+        - name: state
+          emptyDir: {}
+        - name: envio-generated
+          emptyDir: { sizeLimit: 256Mi }
+        - name: tmp
+          emptyDir: { medium: Memory, sizeLimit: 128Mi }
