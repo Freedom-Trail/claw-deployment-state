@@ -5,6 +5,7 @@ import process from "node:process";
 
 const root = path.resolve(process.argv[2] ?? process.cwd());
 const lockPath = "policy/desired-state-lock.json";
+const contentLockPath = "infra/flux/targets/testnet/stages/gate/content-lock.yaml";
 const requiredPayload = new Set([
   ".github/workflows/validate.yml",
   "infra/flux/targets/testnet/control-plane/reconciliation.yaml",
@@ -100,7 +101,8 @@ function validate() {
   exactKeys(lock, [
     "schemaVersion", "activation", "environment", "intentDigest", "intentKeyId",
     "intentPublicKeyDigest", "releaseId", "gitSha", "releasePackage", "sourceUrl",
-    "contentDigest", "files",
+    "readyReference", "readyArtifactDigest", "readyReleaseAttestationDigest",
+    "readyPolicyRevision", "readyPolicyDigest", "admission", "contentDigest", "files",
   ], "desired_state_lock");
   if (
     lock.schemaVersion !== 1 || !["shadow", "active"].includes(lock.activation) ||
@@ -109,7 +111,13 @@ function validate() {
     !/^[a-z0-9][a-z0-9-]{0,50}$/u.test(lock.releaseId) ||
     !/^[a-f0-9]{40}$/u.test(lock.gitSha) ||
     !/^[A-Za-z0-9._:-]{1,128}$/u.test(lock.intentKeyId) ||
-    !/^[a-z0-9][a-z0-9._:-]*(?:\/[a-z0-9._-]+)+@sha256:[a-f0-9]{64}$/u.test(lock.releasePackage)
+    !/^[a-z0-9][a-z0-9._:-]*(?:\/[a-z0-9._-]+)+@sha256:[a-f0-9]{64}$/u.test(lock.releasePackage) ||
+    !/^[a-z0-9][a-z0-9._:-]*(?:\/[a-z0-9._-]+)+@sha256:[a-f0-9]{64}$/u.test(lock.readyReference) ||
+    !digestPattern.test(lock.readyArtifactDigest) ||
+    !digestPattern.test(lock.readyReleaseAttestationDigest) ||
+    !digestPattern.test(lock.readyPolicyDigest) ||
+    !Number.isSafeInteger(lock.readyPolicyRevision) || lock.readyPolicyRevision < 1 ||
+    !lock.readyReference.endsWith(`@${lock.readyArtifactDigest}`)
   ) {
     throw new Error("desired_state_lock_identity_invalid");
   }
@@ -127,7 +135,7 @@ function validate() {
   if (
     payloadPaths.some((file) => !permittedPath.test(file) || file === lockPath) ||
     [...requiredPayload].some((file) => !payloadPaths.includes(file)) ||
-    JSON.stringify(files) !== JSON.stringify([...payloadPaths, lockPath].sort())
+    JSON.stringify(files) !== JSON.stringify([...payloadPaths, lockPath, contentLockPath].sort())
   ) {
     throw new Error("desired_state_file_set_invalid");
   }
@@ -138,6 +146,22 @@ function validate() {
   });
   if (namedFilesDigest(payload) !== lock.contentDigest) {
     throw new Error("desired_state_content_digest_mismatch");
+  }
+  const contentLock = readFileSync(path.join(root, contentLockPath), "utf8");
+  const expectedContentLock = [
+    "apiVersion: v1",
+    "kind: ConfigMap",
+    "metadata:",
+    "  name: claw-desired-state-content-lock",
+    "  namespace: claw-testnet",
+    "data:",
+    `  contentDigest: ${lock.contentDigest}`,
+    `  intentDigest: ${lock.intentDigest}`,
+    `  releaseSha: "${lock.gitSha}"`,
+    "",
+  ].join("\n");
+  if (contentLock !== expectedContentLock) {
+    throw new Error("desired_state_content_lock_invalid");
   }
 
   const publicKey = readFileSync(path.join(root, "trust/deployment-intent-public-key.pem"));
@@ -152,7 +176,7 @@ function validate() {
   const signature = clawRelease.spec?.signature;
   const intentDigest = sha256(Buffer.from(canonicalJson(intent)));
   if (
-    clawRelease.apiVersion !== "delivery.claw.io/v1alpha1" ||
+    clawRelease.apiVersion !== "delivery.claw.io/v1alpha2" ||
     clawRelease.kind !== "ClawRelease" || clawRelease.metadata?.namespace !== "claw-testnet" ||
     clawRelease.status !== undefined || clawRelease.spec?.intentDigest !== intentDigest ||
     intentDigest !== lock.intentDigest || signature?.algorithm !== "ed25519" ||
@@ -172,6 +196,12 @@ function validate() {
     intent?.target?.identity?.assetClass !== "synthetic-test" || intent?.target?.signer !== "disabled" ||
     intent?.release?.releaseId !== lock.releaseId || intent?.release?.gitSha !== lock.gitSha ||
     intent?.release?.releasePackage?.reference !== lock.releasePackage ||
+    intent?.release?.ready?.readyReference !== lock.readyReference ||
+    intent?.release?.ready?.readyArtifactDigest !== lock.readyArtifactDigest ||
+    intent?.release?.ready?.readyReleaseAttestationDigest !== lock.readyReleaseAttestationDigest ||
+    intent?.release?.ready?.policyRevision !== lock.readyPolicyRevision ||
+    intent?.release?.ready?.policyDigest !== lock.readyPolicyDigest ||
+    canonicalJson(intent?.admission) !== canonicalJson(lock.admission) ||
     intent?.flux?.sourceUrl !== lock.sourceUrl || intent?.flux?.sourceAuthentication !== "anonymous-public" ||
     intent?.flux?.commitVerification !== "HEAD" || intent?.flux?.sourceNamespace !== "claw-flux-testnet" ||
     intent?.flux?.path !== "./infra/flux/targets/testnet" || intent?.flux?.crossNamespaceRefs !== false ||
@@ -207,9 +237,9 @@ function validate() {
     count(source, /^kind: GitRepository$/gmu) !== 1 ||
     count(source, /^  suspend: false$/gmu) !== 1 ||
     count(source, /^    mode: HEAD$/gmu) !== 1 || !source.includes(`  url: ${lock.sourceUrl}`) ||
-    count(reconciliation, /^kind: Kustomization$/gmu) !== 6 ||
-    count(reconciliation, /^  suspend: true$/gmu) !== (lock.activation === "shadow" ? 6 : 0) ||
-    count(reconciliation, /^  suspend: false$/gmu) !== (lock.activation === "active" ? 6 : 0)
+    count(reconciliation, /^kind: Kustomization$/gmu) !== 5 ||
+    count(reconciliation, /^  suspend: true$/gmu) !== (lock.activation === "shadow" ? 5 : 0) ||
+    count(reconciliation, /^  suspend: false$/gmu) !== (lock.activation === "active" ? 5 : 0)
   ) {
     throw new Error("flux_source_or_suspension_invalid");
   }
@@ -218,6 +248,12 @@ function validate() {
     materialization.activation !== lock.activation || materialization.environment !== "testnet" ||
     materialization.intentDigest !== lock.intentDigest || materialization.releaseId !== lock.releaseId ||
     materialization.gitSha !== lock.gitSha || materialization.releasePackage !== lock.releasePackage ||
+    materialization.readyReference !== lock.readyReference ||
+    materialization.readyArtifactDigest !== lock.readyArtifactDigest ||
+    materialization.readyReleaseAttestationDigest !== lock.readyReleaseAttestationDigest ||
+    materialization.readyPolicyRevision !== lock.readyPolicyRevision ||
+    materialization.readyPolicyDigest !== lock.readyPolicyDigest ||
+    canonicalJson(materialization.admission) !== canonicalJson(lock.admission) ||
     materialization.gitUrl !== lock.sourceUrl ||
     (lock.activation === "shadow" && materialization.shadowEvidenceDigest !== null) ||
     (lock.activation === "active" && !digestPattern.test(materialization.shadowEvidenceDigest))

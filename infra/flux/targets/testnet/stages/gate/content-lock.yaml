@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: claw-desired-state-content-lock
+  namespace: claw-testnet
+data:
+  contentDigest: sha256:443e06267cb41cb34a457d48938cc5b2d76257b93c9547987228443800e73090
+  intentDigest: sha256:d30a97b13610f28beff4b923a316ba51088d73b1600103f0bd1c786f1cdb4758
+  releaseSha: "42a1ae5c6d20f87ed375958a9cf12e52cf43df51"

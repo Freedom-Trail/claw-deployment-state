@@ -1,0 +1,117 @@
+apiVersion: traefik.io/v1alpha1
+kind: TLSStore
+metadata:
+  name: default
+  namespace: claw-testnet
+spec:
+  defaultCertificate:
+    secretName: claw-public-tls
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: claw-strip-api-prefix
+  namespace: claw-testnet
+spec:
+  stripPrefix:
+    prefixes: [/api]
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: claw-redirect-https
+  namespace: claw-testnet
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: claw-web-secure
+  namespace: claw-testnet
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: [t.lobster.bio]
+      secretName: claw-public-tls
+  rules:
+    - host: t.lobster.bio
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: claw-web, port: { name: http } }
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: claw-api-secure
+  namespace: claw-testnet
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: claw-testnet-claw-strip-api-prefix@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: [t.lobster.bio]
+      secretName: claw-public-tls
+  rules:
+    - host: t.lobster.bio
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service: { name: claw-api, port: { name: http } }
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: claw-admin-secure
+  namespace: claw-testnet
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: [at.lobster.bio]
+      secretName: claw-public-tls
+  rules:
+    - host: at.lobster.bio
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: claw-admin, port: { name: http } }
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: claw-http-redirect
+  namespace: claw-testnet
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: claw-testnet-claw-redirect-https@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: t.lobster.bio
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: claw-web, port: { name: http } }
+    - host: at.lobster.bio
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: claw-admin, port: { name: http } }
