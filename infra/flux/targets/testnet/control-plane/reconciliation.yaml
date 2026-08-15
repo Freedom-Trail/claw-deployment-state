@@ -12,7 +12,7 @@ spec:
   interval: 2m
   retryInterval: 1m
   timeout: 15m
-  suspend: true
+  suspend: false
   path: ./infra/flux/targets/testnet/stages/gate
   sourceRef:
     kind: GitRepository
@@ -63,7 +63,7 @@ spec:
   interval: 2m
   retryInterval: 1m
   timeout: 15m
-  suspend: true
+  suspend: false
   path: ./infra/flux/targets/testnet/stages/migration
   sourceRef:
     kind: GitRepository
@@ -95,7 +95,7 @@ spec:
   interval: 2m
   retryInterval: 1m
   timeout: 15m
-  suspend: true
+  suspend: false
   path: ./infra/flux/targets/testnet/stages/backend
   sourceRef:
     kind: GitRepository
@@ -127,7 +127,7 @@ spec:
   interval: 2m
   retryInterval: 1m
   timeout: 15m
-  suspend: true
+  suspend: false
   path: ./infra/flux/targets/testnet/stages/indexer
   sourceRef:
     kind: GitRepository
@@ -159,7 +159,7 @@ spec:
   interval: 2m
   retryInterval: 1m
   timeout: 15m
-  suspend: true
+  suspend: false
   path: ./infra/flux/targets/testnet/stages/frontend
   sourceRef:
     kind: GitRepository
