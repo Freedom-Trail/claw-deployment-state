@@ -2,8 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: claw-testnet
 commonAnnotations:
-  delivery.claw.io/intent-digest: sha256:d30a97b13610f28beff4b923a316ba51088d73b1600103f0bd1c786f1cdb4758
-  delivery.claw.io/release-sha: "42a1ae5c6d20f87ed375958a9cf12e52cf43df51"
+  delivery.claw.io/intent-digest: sha256:b554afcc70aeff763dca5c86840ddc1ec50bcc24944006cb9ea1839d6143b93e
+  delivery.claw.io/release-sha: "1a6766bc0f0065750b12547cc959ccae101508d1"
 resources:
   - clawrelease.json
   - content-lock.yaml
