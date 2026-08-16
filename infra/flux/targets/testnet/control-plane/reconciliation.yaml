@@ -105,6 +105,27 @@ spec:
   prune: true
   deletionPolicy: Orphan
   wait: true
+  healthCheckExprs:
+    - apiVersion: apps/v1
+      kind: Deployment
+      inProgress: >-
+        !has(status.observedGeneration) ||
+        status.observedGeneration != metadata.generation ||
+        !has(status.updatedReplicas) || status.updatedReplicas != spec.replicas ||
+        !has(status.readyReplicas) || status.readyReplicas != spec.replicas ||
+        !has(status.availableReplicas) || status.availableReplicas != spec.replicas ||
+        (has(status.unavailableReplicas) && status.unavailableReplicas != 0)
+      failed: >-
+        has(status.conditions) &&
+        status.conditions.exists(c,
+          c.type == 'Progressing' && c.status == 'False')
+      current: >-
+        has(status.observedGeneration) &&
+        status.observedGeneration == metadata.generation &&
+        has(status.updatedReplicas) && status.updatedReplicas == spec.replicas &&
+        has(status.readyReplicas) && status.readyReplicas == spec.replicas &&
+        has(status.availableReplicas) && status.availableReplicas == spec.replicas &&
+        (!has(status.unavailableReplicas) || status.unavailableReplicas == 0)
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -137,6 +158,27 @@ spec:
   prune: true
   deletionPolicy: Orphan
   wait: true
+  healthCheckExprs:
+    - apiVersion: apps/v1
+      kind: Deployment
+      inProgress: >-
+        !has(status.observedGeneration) ||
+        status.observedGeneration != metadata.generation ||
+        !has(status.updatedReplicas) || status.updatedReplicas != spec.replicas ||
+        !has(status.readyReplicas) || status.readyReplicas != spec.replicas ||
+        !has(status.availableReplicas) || status.availableReplicas != spec.replicas ||
+        (has(status.unavailableReplicas) && status.unavailableReplicas != 0)
+      failed: >-
+        has(status.conditions) &&
+        status.conditions.exists(c,
+          c.type == 'Progressing' && c.status == 'False')
+      current: >-
+        has(status.observedGeneration) &&
+        status.observedGeneration == metadata.generation &&
+        has(status.updatedReplicas) && status.updatedReplicas == spec.replicas &&
+        has(status.readyReplicas) && status.readyReplicas == spec.replicas &&
+        has(status.availableReplicas) && status.availableReplicas == spec.replicas &&
+        (!has(status.unavailableReplicas) || status.unavailableReplicas == 0)
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -169,3 +211,24 @@ spec:
   prune: true
   deletionPolicy: Orphan
   wait: true
+  healthCheckExprs:
+    - apiVersion: apps/v1
+      kind: Deployment
+      inProgress: >-
+        !has(status.observedGeneration) ||
+        status.observedGeneration != metadata.generation ||
+        !has(status.updatedReplicas) || status.updatedReplicas != spec.replicas ||
+        !has(status.readyReplicas) || status.readyReplicas != spec.replicas ||
+        !has(status.availableReplicas) || status.availableReplicas != spec.replicas ||
+        (has(status.unavailableReplicas) && status.unavailableReplicas != 0)
+      failed: >-
+        has(status.conditions) &&
+        status.conditions.exists(c,
+          c.type == 'Progressing' && c.status == 'False')
+      current: >-
+        has(status.observedGeneration) &&
+        status.observedGeneration == metadata.generation &&
+        has(status.updatedReplicas) && status.updatedReplicas == spec.replicas &&
+        has(status.readyReplicas) && status.readyReplicas == spec.replicas &&
+        has(status.availableReplicas) && status.availableReplicas == spec.replicas &&
+        (!has(status.unavailableReplicas) || status.unavailableReplicas == 0)

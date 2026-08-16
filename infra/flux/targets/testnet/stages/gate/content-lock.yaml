@@ -4,6 +4,6 @@ metadata:
   name: claw-desired-state-content-lock
   namespace: claw-testnet
 data:
-  contentDigest: sha256:154b7d003b50141289054bb05375602e951fa7b70de796393b9c91e468c5da90
+  contentDigest: sha256:198ecc38462d50e68c60f4e71b99ea46084683a56e5c48c7af67c320b6c75fe3
   intentDigest: sha256:b554afcc70aeff763dca5c86840ddc1ec50bcc24944006cb9ea1839d6143b93e
   releaseSha: "1a6766bc0f0065750b12547cc959ccae101508d1"
