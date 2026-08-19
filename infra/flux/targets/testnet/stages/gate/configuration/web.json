@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "service": "worker",
+  "service": "web",
   "revision": 4,
   "identity": {
     "environment": "testnet",
@@ -10,19 +10,15 @@
     "chainFactsHash": "sha256:806bcaf3606d428cfc34ea8fd9f86d6c5aca635f979cd57bac63ddc658ab2fa6"
   },
   "values": {
-    "server": {
-      "statusPort": 3001
-    },
-    "database": {
-      "url": "secret://database-worker-url",
-      "schema": "pgboss"
-    },
-    "api": {
-      "internalUrl": "http://claw-api.claw-testnet.svc.cluster.local:3000",
-      "internalKey": "secret://internal-api-key"
-    },
+    "apiBaseUrl": "https://t.lobster.bio/api",
+    "appBaseUrl": "https://t.lobster.bio/",
     "chain": {
+      "id": 97,
       "rpcUrl": "https://bsc-prebsc-dataseed.bnbchain.org"
+    },
+    "labels": {
+      "asset": "测试资产",
+      "chain": "BSC Testnet"
     }
   }
 }

@@ -193,7 +193,9 @@ function validate() {
   if (
     intent?.environment !== "testnet" || intent?.target?.namespace !== "claw-testnet" ||
     intent?.target?.identity?.environment !== "testnet" || intent?.target?.identity?.chainId !== 97 ||
-    intent?.target?.identity?.assetClass !== "synthetic-test" || intent?.target?.signer !== "disabled" ||
+    intent?.target?.signer !== "disabled" || intent?.release?.config?.schemaVersion !== 1 ||
+    !/^sha256:[a-f0-9]{64}$/u.test(String(intent?.release?.config?.bundleDigest ?? "")) ||
+    !Number.isSafeInteger(intent?.release?.config?.revision) || intent.release.config.revision < 1 ||
     intent?.release?.releaseId !== lock.releaseId || intent?.release?.gitSha !== lock.gitSha ||
     intent?.release?.releasePackage?.reference !== lock.releasePackage ||
     intent?.release?.ready?.readyReference !== lock.readyReference ||
@@ -206,9 +208,7 @@ function validate() {
     intent?.flux?.commitVerification !== "HEAD" || intent?.flux?.sourceNamespace !== "claw-flux-testnet" ||
     intent?.flux?.path !== "./infra/flux/targets/testnet" || intent?.flux?.crossNamespaceRefs !== false ||
     intent?.flux?.remoteBases !== false || intent?.flux?.imageAutomation !== false ||
-    intent?.safety?.destructiveCutover !== "forbidden" ||
-    intent?.publicRuntimeConfig?.chainLabel !== "BSC Testnet" ||
-    intent?.publicRuntimeConfig?.assetLabel !== "测试资产"
+    intent?.safety?.destructiveCutover !== "forbidden"
   ) {
     throw new Error("testnet_intent_boundary_invalid");
   }

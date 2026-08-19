@@ -1,1 +1,66 @@
-{"config":{"BSC_RPC_URL":"https://bsc-prebsc-dataseed.bnbchain.org","CLAW_ASSET_CLASS":"synthetic-test","CLAW_CHAIN_FACTS_HASH":"sha256:806bcaf3606d428cfc34ea8fd9f86d6c5aca635f979cd57bac63ddc658ab2fa6","CLAW_CHAIN_ID":97,"CLAW_CONFIG_REVISION":3,"CLAW_CONTRACT_SET_ID":"claw-cth-bsc-testnet-v1","CLAW_DEPLOYMENT_ENVIRONMENT":"testnet","CLAW_DEPOSIT_CUSTODY_VAULT":"0x664C5593B6bc175957fB529542eDAd63e0499607","CLAW_DEPOSIT_GATEWAY_ADDRESS":"0xA520FB53439D48Db7075Fc190c44Fd0116A30b82","CLAW_DEPOSIT_START_BLOCK":124140763,"CLAW_ENV":"testnet","CLAW_ENVIRONMENT_UUID":"019fec46-7a76-7771-85e1-5ae92ab6e577","CLAW_INDEXER_START_BLOCK":124140763,"CLAW_PAYMENT_ADDRESS":"0xb7B7707a96975d34F2106d47a6F324fFEbFB18af","CLAW_PAYMENT_START_BLOCK":124140771,"CLAW_TOKEN_ADDRESS":"0x8d09502454c8182D52b78019726Ea07f9C68d4F1","ENVIO_BLOCK_LAG":15,"ENVIO_FULL_BATCH_SIZE":100,"ENVIO_HASURA":false,"ENVIO_INDEXER_PORT":9898,"ENVIO_INTERNAL_API_TIMEOUT_MS":15000,"ENVIO_INTERNAL_API_URL":"http://claw-api.claw-testnet.svc.cluster.local:3000","ENVIO_LOCAL_LOOKBACK_BLOCKS":5,"ENVIO_LOCAL_STATE_FILE":"/var/lib/claw-indexer/start-block","ENVIO_PG_DATABASE":"claw_indexer","ENVIO_PG_HOST":"claw-indexer-postgres.claw-testnet.svc.cluster.local","ENVIO_PG_PORT":5433,"ENVIO_PG_SCHEMA":"envio_first_20260810o","ENVIO_PG_SSL_MODE":"require","ENVIO_PG_USER":"claw_indexer","ENVIO_RPC_ROLE":"sync","ENVIO_TUI":false,"INDEXER_CONTROL_HOST":"0.0.0.0","INDEXER_CONTROL_PORT":9900,"INDEXER_DEPLOYMENT_STATE_CACHE_MS":1000,"INDEXER_FREEZE_TIMEOUT_MS":30000,"INDEXER_GENERATION":"legacy","INDEXER_READY_MAX_SOURCE_LAG_BLOCKS":120,"INDEXER_RPC_TIMEOUT_MS":5000,"USDT_TOKEN_ADDRESS":"0x5f2c1fDe722635BD50978F35Df2f7cB1D1c8a72C"},"hash":"c01d900c1401055511982f11cbe366ce74fbc688edfc667dd08ae14f4d62ce14","hotReloadable":[],"restartRequired":["BSC_RPC_URL","CLAW_ASSET_CLASS","CLAW_CHAIN_FACTS_HASH","CLAW_CHAIN_ID","CLAW_CONFIG_REVISION","CLAW_CONTRACT_SET_ID","CLAW_DEPLOYMENT_ENVIRONMENT","CLAW_DEPOSIT_CUSTODY_VAULT","CLAW_DEPOSIT_GATEWAY_ADDRESS","CLAW_DEPOSIT_START_BLOCK","CLAW_ENV","CLAW_ENVIRONMENT_UUID","CLAW_INDEXER_START_BLOCK","CLAW_PAYMENT_ADDRESS","CLAW_PAYMENT_START_BLOCK","CLAW_TOKEN_ADDRESS","ENVIO_BLOCK_LAG","ENVIO_FULL_BATCH_SIZE","ENVIO_HASURA","ENVIO_INDEXER_PORT","ENVIO_INTERNAL_API_KEY","ENVIO_INTERNAL_API_TIMEOUT_MS","ENVIO_INTERNAL_API_URL","ENVIO_LOCAL_LOOKBACK_BLOCKS","ENVIO_LOCAL_STATE_FILE","ENVIO_PG_DATABASE","ENVIO_PG_HOST","ENVIO_PG_PASSWORD","ENVIO_PG_PORT","ENVIO_PG_SCHEMA","ENVIO_PG_SSL_MODE","ENVIO_PG_USER","ENVIO_RELEASE_CONTROL_TOKEN","ENVIO_RPC_ROLE","ENVIO_TUI","INDEXER_CONTROL_HOST","INDEXER_CONTROL_PORT","INDEXER_DEPLOYMENT_STATE_CACHE_MS","INDEXER_FREEZE_TIMEOUT_MS","INDEXER_GENERATION","INDEXER_READY_MAX_SOURCE_LAG_BLOCKS","INDEXER_RPC_TIMEOUT_MS","USDT_TOKEN_ADDRESS"],"revision":3,"schemaVersion":1,"secretRefs":{"ENVIO_INTERNAL_API_KEY":"claw/testnet/shared/internal-api-key","ENVIO_PG_PASSWORD":"claw/testnet/database/indexer-password","ENVIO_RELEASE_CONTROL_TOKEN":"claw/testnet/indexer/release-control-token"},"service":"indexer"}
+{
+  "schemaVersion": 1,
+  "service": "indexer",
+  "revision": 4,
+  "identity": {
+    "environment": "testnet",
+    "environmentUuid": "019fec46-7a76-7771-85e1-5ae92ab6e577",
+    "chainId": 97,
+    "contractSetId": "claw-cth-bsc-testnet-v1",
+    "chainFactsHash": "sha256:806bcaf3606d428cfc34ea8fd9f86d6c5aca635f979cd57bac63ddc658ab2fa6"
+  },
+  "values": {
+    "mode": "enabled",
+    "chain": {
+      "rpcUrl": "https://bsc-prebsc-dataseed.bnbchain.org",
+      "payment": {
+        "address": "0xb7B7707a96975d34F2106d47a6F324fFEbFB18af",
+        "startBlock": 124140771
+      },
+      "deposit": {
+        "address": "0xA520FB53439D48Db7075Fc190c44Fd0116A30b82",
+        "startBlock": 124140763,
+        "custodyVault": "0x664C5593B6bc175957fB529542eDAd63e0499607"
+      },
+      "assets": {
+        "ltTokenAddress": "0x8d09502454c8182D52b78019726Ea07f9C68d4F1",
+        "usdtTokenAddress": "0x5f2c1fDe722635BD50978F35Df2f7cB1D1c8a72C"
+      },
+      "indexerStartBlock": 124140763
+    },
+    "synchronization": {
+      "blockLag": 15,
+      "readyMaxSourceLagBlocks": 120,
+      "rpcRole": "sync",
+      "fullBatchSize": 100,
+      "localLookbackBlocks": 5,
+      "localStateFile": "/var/lib/claw-indexer/start-block"
+    },
+    "api": {
+      "internalUrl": "http://claw-api.claw-testnet.svc.cluster.local:3000",
+      "internalKey": "secret://internal-api-key",
+      "timeoutMs": 15000
+    },
+    "generation": {
+      "id": "legacy",
+      "deploymentStateCacheMs": 1000,
+      "releaseControlToken": "secret://indexer-release-control-token"
+    },
+    "database": {
+      "host": "claw-indexer-postgres.claw-testnet.svc.cluster.local",
+      "port": 5433,
+      "user": "claw_indexer",
+      "password": "secret://database-indexer-password",
+      "name": "claw_indexer",
+      "schema": "envio_first_20260810o",
+      "sslMode": "require"
+    },
+    "server": {
+      "indexerPort": 9898,
+      "controlHost": "0.0.0.0",
+      "controlPort": 9900,
+      "freezeTimeoutMs": 30000,
+      "rpcTimeoutMs": 5000
+    }
+  }
+}

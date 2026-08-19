@@ -7,9 +7,12 @@ spec:
   replicas: 2
   strategy:
     type: RollingUpdate
-    rollingUpdate: { maxUnavailable: 0, maxSurge: 1 }
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
-    matchLabels: { app.kubernetes.io/name: claw-admin }
+    matchLabels:
+      app.kubernetes.io/name: claw-admin
   template:
     metadata:
       labels:
@@ -19,48 +22,59 @@ spec:
       serviceAccountName: claw-admin
       securityContext:
         runAsNonRoot: true
-        runAsUser: 101
-        runAsGroup: 101
-        seccompProfile: { type: RuntimeDefault }
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: admin
           image: registry.invalid/claw/admin:replace
           imagePullPolicy: IfNotPresent
-          ports: [{ name: http, containerPort: 8080 }]
+          ports:
+            - name: http
+              containerPort: 8080
           startupProbe:
-            httpGet: { path: /healthz, port: http }
+            httpGet:
+              path: /healthz
+              port: http
             failureThreshold: 20
             periodSeconds: 2
           readinessProbe:
-            httpGet: { path: /healthz, port: http }
+            httpGet:
+              path: /healthz
+              port: http
             periodSeconds: 5
           livenessProbe:
-            httpGet: { path: /healthz, port: http }
+            httpGet:
+              path: /healthz
+              port: http
             periodSeconds: 10
           resources:
-            requests: { cpu: 25m, memory: 48Mi }
-            limits: { cpu: 250m, memory: 128Mi }
+            requests:
+              cpu: 25m
+              memory: 48Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            capabilities: { drop: ["ALL"] }
+            capabilities:
+              drop:
+                - ALL
           volumeMounts:
-            - { name: frontend-runtime-config, mountPath: /usr/share/nginx/html/runtime-config.js, subPath: runtime-config.js, readOnly: true }
-            - { name: tmp, mountPath: /tmp }
-            - { name: nginx-cache, mountPath: /var/cache/nginx }
-            - { name: nginx-run, mountPath: /var/run }
+            - name: config
+              mountPath: /etc/claw/config.json
+              subPath: config.json
+              readOnly: true
       volumes:
-        - name: frontend-runtime-config
+        - name: config
           configMap:
-            name: claw-frontend-runtime-config
+            name: claw-service-configs
             items:
-              - { key: admin-runtime-config.js, path: runtime-config.js }
-        - name: tmp
-          emptyDir: { medium: Memory, sizeLimit: 16Mi }
-        - name: nginx-cache
-          emptyDir: { medium: Memory, sizeLimit: 32Mi }
-        - name: nginx-run
-          emptyDir: { medium: Memory, sizeLimit: 8Mi }
+              - key: admin.json
+                path: config.json
+---
 ---
 apiVersion: v1
 kind: Service
@@ -69,4 +83,4 @@ metadata:
   namespace: claw-prod
 spec:
   selector: { app.kubernetes.io/name: claw-admin }
-  ports: [{ name: http, port: 8080, targetPort: http }]
+  ports: [ { name: http, port: 8080, targetPort: http } ]

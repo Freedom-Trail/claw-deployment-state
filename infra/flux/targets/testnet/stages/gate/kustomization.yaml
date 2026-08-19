@@ -2,17 +2,20 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: claw-testnet
 commonAnnotations:
-  delivery.claw.io/intent-digest: sha256:b554afcc70aeff763dca5c86840ddc1ec50bcc24944006cb9ea1839d6143b93e
-  delivery.claw.io/release-sha: "1a6766bc0f0065750b12547cc959ccae101508d1"
+  delivery.claw.io/intent-digest: sha256:d0850ac4351cfafec06a233d4a4e4184373114e72e2ec85f654db20098b12191
+  delivery.claw.io/release-sha: "dd9878d0145c8db1a382fe80c173f868b6a9115f"
 resources:
   - clawrelease.json
   - content-lock.yaml
-  - public-runtime-config.yaml
 configMapGenerator:
   - name: claw-service-configs
     files:
       - api.json=configuration/api.json
       - worker.json=configuration/worker.json
       - indexer.json=configuration/indexer.json
+      - signer.json=configuration/signer.json
+      - migration.json=configuration/migration.json
+      - web.json=configuration/web.json
+      - admin.json=configuration/admin.json
 generatorOptions:
   disableNameSuffixHash: true

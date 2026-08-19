@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "service": "migration",
+  "revision": 4,
+  "identity": {
+    "environment": "testnet",
+    "environmentUuid": "019fec46-7a76-7771-85e1-5ae92ab6e577",
+    "chainId": 97,
+    "contractSetId": "claw-cth-bsc-testnet-v1",
+    "chainFactsHash": "sha256:806bcaf3606d428cfc34ea8fd9f86d6c5aca635f979cd57bac63ddc658ab2fa6"
+  },
+  "values": {
+    "database": {
+      "url": "secret://database-migrator-url",
+      "schema": "public"
+    }
+  }
+}

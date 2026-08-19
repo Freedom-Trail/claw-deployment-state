@@ -1,1 +1,55 @@
-{"config":{"API_PORT":3000,"BSC_RPC_URL":"https://bsc-prebsc-dataseed.bnbchain.org","CLAW_ASSET_CLASS":"synthetic-test","CLAW_CHAIN_FACTS_HASH":"sha256:806bcaf3606d428cfc34ea8fd9f86d6c5aca635f979cd57bac63ddc658ab2fa6","CLAW_CHAIN_ID":97,"CLAW_CONFIG_REVISION":3,"CLAW_CONTRACT_SET_ID":"claw-cth-bsc-testnet-v1","CLAW_DEPLOYMENT_ENVIRONMENT":"testnet","CLAW_DEPOSIT_CUSTODY_VAULT":"0x664C5593B6bc175957fB529542eDAd63e0499607","CLAW_DEPOSIT_GATEWAY_ADDRESS":"0xA520FB53439D48Db7075Fc190c44Fd0116A30b82","CLAW_DEPOSIT_START_BLOCK":124140763,"CLAW_ENV":"testnet","CLAW_ENVIRONMENT_UUID":"019fec46-7a76-7771-85e1-5ae92ab6e577","CLAW_PAYMENT_ADDRESS":"0xb7B7707a96975d34F2106d47a6F324fFEbFB18af","CLAW_PAYMENT_START_BLOCK":124140771,"CLAW_TOKEN_ADDRESS":"0x8d09502454c8182D52b78019726Ea07f9C68d4F1","CORS_ORIGINS":"https://t.lobster.bio,https://at.lobster.bio","DATABASE_SCHEMA":"public","PERSISTENCE_MODE":"postgres","REWARD_CYCLE_CONTROL_ENABLED":true,"SIGNER_INTERNAL_URL":"http://signer-disabled.invalid:3002","USDT_TOKEN_ADDRESS":"0x5f2c1fDe722635BD50978F35Df2f7cB1D1c8a72C","WITHDRAWAL_CHAIN_ADAPTER":"unavailable"},"hash":"08e5094a8e36bc34048c6fc706b96c3254afa9ca67acb9a2ed52bd694f6abcc5","hotReloadable":[],"restartRequired":["ADMIN_AUTH_TOKEN","API_PORT","AUTH_SESSION_SECRET","BSC_RPC_URL","CLAW_ASSET_CLASS","CLAW_CHAIN_FACTS_HASH","CLAW_CHAIN_ID","CLAW_CONFIG_REVISION","CLAW_CONTRACT_SET_ID","CLAW_DEPLOYMENT_ENVIRONMENT","CLAW_DEPOSIT_CUSTODY_VAULT","CLAW_DEPOSIT_GATEWAY_ADDRESS","CLAW_DEPOSIT_START_BLOCK","CLAW_ENV","CLAW_ENVIRONMENT_UUID","CLAW_PAYMENT_ADDRESS","CLAW_PAYMENT_START_BLOCK","CLAW_TOKEN_ADDRESS","CORS_ORIGINS","DATABASE_SCHEMA","DATABASE_URL","INTERNAL_API_KEY","PERSISTENCE_MODE","REWARD_CYCLE_CONTROL_ENABLED","SIGNER_INTERNAL_URL","USDT_TOKEN_ADDRESS","WITHDRAWAL_CHAIN_ADAPTER"],"revision":3,"schemaVersion":1,"secretRefs":{"ADMIN_AUTH_TOKEN":"claw/testnet/auth/admin-token","AUTH_SESSION_SECRET":"claw/testnet/auth/session-secret","DATABASE_URL":"claw/testnet/database/api-url","INTERNAL_API_KEY":"claw/testnet/shared/internal-api-key"},"service":"api"}
+{
+  "schemaVersion": 1,
+  "service": "api",
+  "revision": 4,
+  "identity": {
+    "environment": "testnet",
+    "environmentUuid": "019fec46-7a76-7771-85e1-5ae92ab6e577",
+    "chainId": 97,
+    "contractSetId": "claw-cth-bsc-testnet-v1",
+    "chainFactsHash": "sha256:806bcaf3606d428cfc34ea8fd9f86d6c5aca635f979cd57bac63ddc658ab2fa6"
+  },
+  "values": {
+    "server": {
+      "port": 3000
+    },
+    "http": {
+      "corsOrigins": [
+        "https://t.lobster.bio",
+        "https://at.lobster.bio"
+      ]
+    },
+    "database": {
+      "mode": "postgres",
+      "url": "secret://database-api-url",
+      "schema": "public"
+    },
+    "auth": {
+      "sessionSecret": "secret://auth-session-secret",
+      "adminToken": "secret://auth-admin-token",
+      "internalApiKey": "secret://internal-api-key"
+    },
+    "chain": {
+      "rpcUrl": "https://bsc-prebsc-dataseed.bnbchain.org",
+      "payment": {
+        "address": "0xb7B7707a96975d34F2106d47a6F324fFEbFB18af",
+        "startBlock": 124140771
+      },
+      "deposit": {
+        "address": "0xA520FB53439D48Db7075Fc190c44Fd0116A30b82",
+        "startBlock": 124140763,
+        "custodyVault": "0x664C5593B6bc175957fB529542eDAd63e0499607"
+      },
+      "assets": {
+        "ltTokenAddress": "0x8d09502454c8182D52b78019726Ea07f9C68d4F1",
+        "usdtTokenAddress": "0x5f2c1fDe722635BD50978F35Df2f7cB1D1c8a72C"
+      }
+    },
+    "signer": {
+      "internalUrl": "http://claw-signer.claw-testnet.svc.cluster.local:3002"
+    },
+    "withdrawals": {
+      "adapter": "unavailable"
+    }
+  }
+}

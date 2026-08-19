@@ -1,14 +1,14 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: claw-migrate-claw-1a6766bc0f0065750b12547cc959ccae101508d1
+  name: claw-migrate-claw-dd9878d0145c8db1a382fe80c173f868b6a9115f
   namespace: claw-testnet
   annotations:
     kustomize.toolkit.fluxcd.io/prune: disabled
-    delivery.claw.io/migration-authorization-digest: sha256:48be7f3da9e41b61f282213e5f57931ce43aec7d43e32965c2856eaf1ddb819b
+    delivery.claw.io/migration-authorization-digest: sha256:b6f31b1fe4b0ef8c7953792f2d9e4cec792388430fc4ab81c6118599ace6890f
   labels:
     app.kubernetes.io/name: claw-migrator
-    claw.io/release-id: claw-1a6766bc0f0065750b12547cc959ccae101508d1
+    claw.io/release-id: claw-dd9878d0145c8db1a382fe80c173f868b6a9115f
 spec:
   backoffLimit: 3
   activeDeadlineSeconds: 600
@@ -17,7 +17,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: claw-migrator
-        claw.io/release-id: claw-1a6766bc0f0065750b12547cc959ccae101508d1
+        claw.io/release-id: claw-dd9878d0145c8db1a382fe80c173f868b6a9115f
     spec:
       restartPolicy: OnFailure
       serviceAccountName: claw-migrator
@@ -26,43 +26,58 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
-        seccompProfile: { type: RuntimeDefault }
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: migrate
-          image: 127.0.0.1:5000/claw/backend@sha256:1dad3ed3d07c1aa7df6ac2b582de114c602c6e24d9fe703e7c550593ca16b3cd
+          image: 127.0.0.1:5000/claw/backend@sha256:8355d83626296b14b588162859afa60c99e5efad836cf34d0ee81701974ebd4c
           imagePullPolicy: IfNotPresent
-          command: ["pnpm", "--filter", "@claw/api", "release:migrate"]
+          command:
+            - pnpm
+            - --filter
+            - "@claw/api"
+            - release:migrate
           env:
-            - { name: NODE_ENV, value: production }
-            - { name: CLAW_ENV, value: testnet }
-            - { name: CLAW_CONFIG_FILE, value: /etc/claw/config/api.json }
-            - { name: CLAW_SECRETS_DIR, value: /run/secrets/claw }
+            - name: NODE_ENV
+              value: production
           resources:
-            requests: { cpu: 100m, memory: 256Mi }
-            limits: { cpu: "1", memory: 512Mi }
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            capabilities: { drop: ["ALL"] }
+            capabilities:
+              drop:
+                - ALL
           volumeMounts:
-            - { name: config, mountPath: /etc/claw/config, readOnly: true }
-            - { name: secrets, mountPath: /run/secrets/claw, readOnly: true }
-            - { name: tmp, mountPath: /tmp }
+            - name: config
+              mountPath: /etc/claw/config.json
+              subPath: config.json
+              readOnly: true
+            - name: secrets
+              mountPath: /run/secrets/claw
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
       volumes:
         - name: config
           configMap:
             name: claw-service-configs
-            items: [{ key: api.json, path: api.json }]
+            items:
+              - key: migration.json
+                path: config.json
         - name: secrets
           secret:
             secretName: claw-runtime-secrets
-            defaultMode: 0440
+            defaultMode: 288
             items:
-              - { key: bsc-rpc-url, path: claw/testnet/shared/bsc-rpc-url }
-              - { key: database-migrator-url, path: claw/testnet/database/api-url }
-              - { key: database-ca, path: claw/testnet/database/ca.crt }
-              - { key: auth-session-secret, path: claw/testnet/auth/session-secret }
-              - { key: auth-admin-token, path: claw/testnet/auth/admin-token }
-              - { key: internal-api-key, path: claw/testnet/shared/internal-api-key }
+              - key: database-migrator-url
+                path: database-migrator-url
         - name: tmp
-          emptyDir: { medium: Memory, sizeLimit: 64Mi }
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
