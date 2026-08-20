@@ -97,6 +97,8 @@ spec:
             secretName: claw-runtime-secrets
             defaultMode: 288
             items:
+              - key: database-ca
+                path: database-ca
               - key: database-worker-url
                 path: database-worker-url
               - key: internal-api-key

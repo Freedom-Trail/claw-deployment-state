@@ -101,6 +101,8 @@ spec:
                 path: auth-session-secret
               - key: database-api-url
                 path: database-api-url
+              - key: database-ca
+                path: database-ca
               - key: internal-api-key
                 path: internal-api-key
         - name: tmp

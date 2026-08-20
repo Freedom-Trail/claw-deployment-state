@@ -1,14 +1,14 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: claw-migrate-claw-53ea57c4f7c676347edcde8952c4d8dcc657ed93
+  name: claw-migrate-claw-a22990fd372523a571373f15c8d3c70bc770bdb9
   namespace: claw-testnet
   annotations:
     kustomize.toolkit.fluxcd.io/prune: disabled
-    delivery.claw.io/migration-authorization-digest: sha256:b9c1b0ec031029250f1988fa84d0cbb1ebe81214fdc04a2e23dda3321103c4cd
+    delivery.claw.io/migration-authorization-digest: sha256:680c40a12d49af0c759c4171c2a4ffba8cfdb388ad98e3206327818fdf305fed
   labels:
     app.kubernetes.io/name: claw-migrator
-    claw.io/release-id: claw-53ea57c4f7c676347edcde8952c4d8dcc657ed93
+    claw.io/release-id: claw-a22990fd372523a571373f15c8d3c70bc770bdb9
 spec:
   backoffLimit: 3
   activeDeadlineSeconds: 600
@@ -17,7 +17,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: claw-migrator
-        claw.io/release-id: claw-53ea57c4f7c676347edcde8952c4d8dcc657ed93
+        claw.io/release-id: claw-a22990fd372523a571373f15c8d3c70bc770bdb9
     spec:
       restartPolicy: OnFailure
       serviceAccountName: claw-migrator
@@ -30,7 +30,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: migrate
-          image: 127.0.0.1:5000/claw/backend@sha256:09906e69670fffcef9a8e20ecd7d2257686a5aa3caff3fc4326c8948d2e6f81f
+          image: 127.0.0.1:5000/claw/backend@sha256:a3ff26d6cb19a0363ee71650e1b72dd49f713ba112361aa07cf25ce4ae05ceec
           imagePullPolicy: IfNotPresent
           command:
             - pnpm
@@ -75,6 +75,8 @@ spec:
             secretName: claw-runtime-secrets
             defaultMode: 288
             items:
+              - key: database-ca
+                path: database-ca
               - key: database-migrator-url
                 path: database-migrator-url
         - name: tmp

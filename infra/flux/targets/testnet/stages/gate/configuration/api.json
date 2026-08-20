@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "service": "api",
-  "revision": 4,
+  "revision": 5,
   "identity": {
     "environment": "testnet",
     "environmentUuid": "019fec46-7a76-7771-85e1-5ae92ab6e577",
@@ -22,6 +22,7 @@
     "database": {
       "mode": "postgres",
       "url": "secret://database-api-url",
+      "caCertificate": "secret://database-ca",
       "schema": "public"
     },
     "auth": {

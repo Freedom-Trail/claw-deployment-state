@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "service": "web",
-  "revision": 4,
+  "revision": 5,
   "identity": {
     "environment": "testnet",
     "environmentUuid": "019fec46-7a76-7771-85e1-5ae92ab6e577",
