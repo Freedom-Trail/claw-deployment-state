@@ -2,9 +2,9 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: claw-testnet
 commonAnnotations:
-  claw.io/release-id: claw-8f91eb3a60b61c8417004a31bde5d902afa4de4c
-  delivery.claw.io/intent-digest: sha256:cf80719b584c37a66b6e8930390f094b3d35b7a39d664ae12b5e3d4594da5d23
-  delivery.claw.io/release-sha: "8f91eb3a60b61c8417004a31bde5d902afa4de4c"
+  claw.io/release-id: claw-4b309a58a8900f68fe0b2d8a6cb220019a1e3f2c
+  delivery.claw.io/intent-digest: sha256:d705b557f3e8bdc1c2f85e81042471d1037849d0510ed7d8b02a54bd74545537
+  delivery.claw.io/release-sha: "4b309a58a8900f68fe0b2d8a6cb220019a1e3f2c"
 resources:
   - ../../../../../k8s/base
   - public-entry.yaml
@@ -38,7 +38,7 @@ patches:
 images:
   - name: registry.invalid/claw/web
     newName: 127.0.0.1:5000/claw/web
-    digest: sha256:030e4e0d4ab0d9fe1f054464e293eabbc7c8530e06a394b76271bc44d86b91a4
+    digest: sha256:1ab0dca79c4baa2ee2f4f93e76dbafc40b6e12177b7b3e24e11ea50039c0eae5
   - name: registry.invalid/claw/admin
     newName: 127.0.0.1:5000/claw/admin
-    digest: sha256:2324033d795b39e73ee9f1b8bb946631165e019e44a94bfd7e42ba7f15ce61dd
+    digest: sha256:5df00820285166f54b7583b6e2a8b8e8b168fed328ff750f17c2458df7f52322
