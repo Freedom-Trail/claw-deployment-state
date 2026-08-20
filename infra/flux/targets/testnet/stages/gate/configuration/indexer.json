@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "service": "indexer",
-  "revision": 5,
+  "revision": 6,
   "identity": {
     "environment": "testnet",
     "environmentUuid": "019fec46-7a76-7771-85e1-5ae92ab6e577",
@@ -51,6 +51,7 @@
       "port": 5433,
       "user": "claw_indexer",
       "password": "secret://database-indexer-password",
+      "caCertificate": "secret://database-ca",
       "name": "claw_indexer",
       "schema": "envio_first_20260810o",
       "sslMode": "require"

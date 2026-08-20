@@ -90,6 +90,8 @@ spec:
             secretName: claw-runtime-secrets
             defaultMode: 288
             items:
+              - key: database-ca
+                path: database-ca
               - key: database-indexer-password
                 path: database-indexer-password
               - key: indexer-release-control-token
