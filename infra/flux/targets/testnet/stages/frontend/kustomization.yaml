@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: claw-testnet
 commonAnnotations:
   claw.io/release-id: claw-a22990fd372523a571373f15c8d3c70bc770bdb9
-  delivery.claw.io/intent-digest: sha256:9498199ab9bda958f92f019ae296bbdb6122486074a574aacfb270b85ded7965
+  delivery.claw.io/intent-digest: sha256:42af3b53b57e9a75168d7a1defe052be1e02c4499a0ea343002f982974821a6c
   delivery.claw.io/release-sha: "a22990fd372523a571373f15c8d3c70bc770bdb9"
 resources:
   - ../../../../../k8s/base
