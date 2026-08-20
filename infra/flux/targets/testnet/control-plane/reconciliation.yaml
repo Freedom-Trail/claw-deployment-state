@@ -6,8 +6,8 @@ metadata:
   labels:
     delivery.claw.io/environment: testnet
     delivery.claw.io/stage: gate
-    delivery.claw.io/intent-id: claw-dd9878d0145c8db1a382fe80c173f868b6a9115f
-    delivery.claw.io/release-sha: "dd9878d0145c8db1a382fe80c173f868b6a9115f"
+    delivery.claw.io/intent-id: claw-53ea57c4f7c676347edcde8952c4d8dcc657ed93
+    delivery.claw.io/release-sha: "53ea57c4f7c676347edcde8952c4d8dcc657ed93"
 spec:
   interval: 2m
   retryInterval: 1m
@@ -25,7 +25,7 @@ spec:
   healthChecks:
     - apiVersion: delivery.claw.io/v1alpha2
       kind: ClawRelease
-      name: claw-dd9878d0145c8db1a382fe80c173f868b6a9115f
+      name: claw-53ea57c4f7c676347edcde8952c4d8dcc657ed93
       namespace: claw-testnet
   healthCheckExprs:
     - apiVersion: delivery.claw.io/v1alpha2
@@ -50,8 +50,8 @@ metadata:
   labels:
     delivery.claw.io/environment: testnet
     delivery.claw.io/stage: migration
-    delivery.claw.io/intent-id: claw-dd9878d0145c8db1a382fe80c173f868b6a9115f
-    delivery.claw.io/release-sha: "dd9878d0145c8db1a382fe80c173f868b6a9115f"
+    delivery.claw.io/intent-id: claw-53ea57c4f7c676347edcde8952c4d8dcc657ed93
+    delivery.claw.io/release-sha: "53ea57c4f7c676347edcde8952c4d8dcc657ed93"
 spec:
   dependsOn:
     - name: claw-gate
@@ -82,8 +82,8 @@ metadata:
   labels:
     delivery.claw.io/environment: testnet
     delivery.claw.io/stage: backend
-    delivery.claw.io/intent-id: claw-dd9878d0145c8db1a382fe80c173f868b6a9115f
-    delivery.claw.io/release-sha: "dd9878d0145c8db1a382fe80c173f868b6a9115f"
+    delivery.claw.io/intent-id: claw-53ea57c4f7c676347edcde8952c4d8dcc657ed93
+    delivery.claw.io/release-sha: "53ea57c4f7c676347edcde8952c4d8dcc657ed93"
 spec:
   dependsOn:
     - name: claw-migration
@@ -135,8 +135,8 @@ metadata:
   labels:
     delivery.claw.io/environment: testnet
     delivery.claw.io/stage: indexer
-    delivery.claw.io/intent-id: claw-dd9878d0145c8db1a382fe80c173f868b6a9115f
-    delivery.claw.io/release-sha: "dd9878d0145c8db1a382fe80c173f868b6a9115f"
+    delivery.claw.io/intent-id: claw-53ea57c4f7c676347edcde8952c4d8dcc657ed93
+    delivery.claw.io/release-sha: "53ea57c4f7c676347edcde8952c4d8dcc657ed93"
 spec:
   dependsOn:
     - name: claw-backend
@@ -188,8 +188,8 @@ metadata:
   labels:
     delivery.claw.io/environment: testnet
     delivery.claw.io/stage: frontend
-    delivery.claw.io/intent-id: claw-dd9878d0145c8db1a382fe80c173f868b6a9115f
-    delivery.claw.io/release-sha: "dd9878d0145c8db1a382fe80c173f868b6a9115f"
+    delivery.claw.io/intent-id: claw-53ea57c4f7c676347edcde8952c4d8dcc657ed93
+    delivery.claw.io/release-sha: "53ea57c4f7c676347edcde8952c4d8dcc657ed93"
 spec:
   dependsOn:
     - name: claw-indexer
